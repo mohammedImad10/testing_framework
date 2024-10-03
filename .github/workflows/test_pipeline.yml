@@ -1,0 +1,37 @@
+name: Create S3 Folder on Commit
+
+on:
+  push:
+    branches:
+      - master  # Adjust this if you want the pipeline to trigger on a different branch
+
+jobs:
+  create-s3-folder:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Install AWS CLI
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update && sudo apt-get install -y awscli
+
+    # Step 3: Configure AWS credentials using GitHub Secrets
+    - name: Configure AWS CLI
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set region ${{ secrets.AWS_REGION }}
+
+    # Step 4: Create folder in S3 using the commit ID
+    - name: Create S3 folder with commit name
+      run: |
+        COMMIT_ID=$(git rev-parse --short HEAD)  # Get the short commit ID
+        S3_BUCKET_NAME="testingresults"  # Replace with your S3 bucket name
+        FOLDER_NAME="$COMMIT_ID/"  # Folder structure in S3
+
+        # Create the folder in S3
+        aws s3api put-object --bucket $S3_BUCKET_NAME --key $FOLDER_NAME
