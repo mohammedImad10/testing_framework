@@ -2,6 +2,7 @@ import boto3
 import json
 
 
+
 class LambdaInvoker:
     def __init__(self):
         self.lambda_client = boto3.client('lambda')
@@ -13,5 +14,3 @@ class LambdaInvoker:
             Payload=json.dumps({})
         )
         return json.loads(response['Payload'].read())
-
-
